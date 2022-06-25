@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="//cdn.webrtc.ecl.ntt.com/skyway-4.4.4.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript"
+ src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <title>SkyWay - P2P Data example</title>
+</head>
+
+<body>
+    room: <input type="text" id="roomName"> <button id="join">入室</button>
+    <br><button id="leave">退室</button>
+    <hr>
+    <input type="text" id="msg" placeholder="チャットを入力"> <button id="send">send</button>
+    <hr>
+    <div id="chatLog">
+
+    </div>
+</body>
+<script>
+    // peerオブジェクト
+    const peer = new Peer({
+        key: 'f0e549d0-cb28-435f-816a-7a022ac3be32', // 自分のAPIキーを入力
+        debug: 3
+    });
+
+    // 入室
+    let room = null;
+    $('#join').click(function () {
+        room = peer.joinRoom($('#roomName').val(), { mode: 'sfu' });
+        chatlog('<i>' + $('#roomName').val() + '</i>に入室しました');
+
+        // チャットを送信
+        $('#send').click(function () {
+            var msg = $('#msg').val();
+            room.send(msg);
+            chatlog('自分> ' + msg);
+        });
+
+        // チャットを受信
+        room.on('data', function (data) {
+            chatlog('ID: ' + data.src + '> ' + data.data); // data.src = 送信者のpeerid, data.data = 送信されたメッセージ
+        });
+    });
+
+    // 退室
+    $('#leave').click(function () {
+        room.close();
+        chatlog('<i>' + $('#roomName').val() + '</i>から退室しました');
+    })
+
+
+    // チャットログに記録するための関数
+    function chatlog(msg) {
+        $('#chatLog').append('<p>' + msg + '</p>');
+    }
+</script>
+
+</html>
